@@ -437,36 +437,6 @@
   </notepads>
   <order>
     <hop>
-      <from>URL_VIACEP</from>
-      <to>Consulta CEP</to>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
-      <from>Consulta CEP</from>
-      <to>JSON Input</to>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
-      <from>Ordena Vendas</from>
-      <to>URL_VIACEP</to>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
-      <from>Dados Sales</from>
-      <to>Obtém Data 6 Meses Atrás</to>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
-      <from>Remove Real</from>
-      <to>Select values 2</to>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
-      <from>Obtém Data 6 Meses Atrás</from>
-      <to>Remove Real</to>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
       <from>Select values 2</from>
       <to>Captura Últimos 6 Meses</to>
       <enabled>Y</enabled>
@@ -482,23 +452,63 @@
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>HTTP Post</from>
-      <to>Modified Java Script Value</to>
+      <from>Group by 2</from>
+      <to>Ordenar Maior Faturamento</to>
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>JSON Input</from>
+      <from>Ordenar Maior Faturamento</from>
+      <to>Gerar Planilha</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>HTTP Post</from>
+      <to>Extrair Valor Frete</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Preparar XML Endereço</from>
+      <to>HTTP Post 2</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>HTTP Post 2</from>
+      <to>Extrair Cidade e UF</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Ordena Vendas</from>
+      <to>Preparar XML Endereço</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Extrair Cidade e UF</from>
       <to>HTTP Post</to>
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>Modified Java Script Value</from>
+      <from>Extrair Valor Frete</from>
       <to>Select values 3</to>
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>Group by 2</from>
+      <from>Extrair Valor Frete</from>
       <to>Microsoft Excel Output</to>
+      <enabled>N</enabled>
+    </hop>
+    <hop>
+      <from>Dados Sales</from>
+      <to>Remove Real</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Remove Real</from>
+      <to>Obtém Data 6 Meses Atrás</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Obtém Data 6 Meses Atrás</from>
+      <to>Select values 2</to>
       <enabled>Y</enabled>
     </hop>
   </order>
@@ -532,49 +542,6 @@
     </remotesteps>
     <GUI>
       <xloc>304</xloc>
-      <yloc>128</yloc>
-      <draw>Y</draw>
-    </GUI>
-  </step>
-  <step>
-    <name>Consulta CEP</name>
-    <type>HTTP</type>
-    <description/>
-    <distribute>Y</distribute>
-    <custom_distribution/>
-    <copies>1</copies>
-    <partitioning>
-      <method>none</method>
-      <schema_name/>
-    </partitioning>
-    <url/>
-    <urlInField>Y</urlInField>
-    <urlField>viacep</urlField>
-    <encoding>UTF-8</encoding>
-    <httpLogin/>
-    <httpPassword>Encrypted </httpPassword>
-    <proxyHost/>
-    <proxyPort/>
-    <socketTimeout>0</socketTimeout>
-    <connectionTimeout>0</connectionTimeout>
-    <closeIdleConnectionsTime>0</closeIdleConnectionsTime>
-    <lookup>
-    </lookup>
-    <result>
-      <name>result</name>
-      <code/>
-      <response_time/>
-      <response_header/>
-    </result>
-    <cluster_schema/>
-    <remotesteps>
-      <input>
-      </input>
-      <output>
-      </output>
-    </remotesteps>
-    <GUI>
-      <xloc>528</xloc>
       <yloc>128</yloc>
       <draw>Y</draw>
     </GUI>
@@ -745,207 +712,72 @@
     </GUI>
   </step>
   <step>
-    <name>Group by 2</name>
-    <type>GroupBy</type>
+    <name>Extrair Cidade e UF</name>
+    <type>ScriptValueMod</type>
     <description/>
-    <distribute>Y</distribute>
+    <distribute>N</distribute>
     <custom_distribution/>
     <copies>1</copies>
     <partitioning>
       <method>none</method>
       <schema_name/>
     </partitioning>
-    <all_rows>N</all_rows>
-    <ignore_aggregate>N</ignore_aggregate>
-    <field_ignore/>
-    <directory>%%java.io.tmpdir%%</directory>
-    <prefix>grp</prefix>
-    <add_linenr>N</add_linenr>
-    <linenr_fieldname/>
-    <give_back_row>N</give_back_row>
-    <group>
-      <field>
-        <name>cpf</name>
-      </field>
-    </group>
+    <compatible>N</compatible>
+    <optimizationLevel>9</optimizationLevel>
+    <jsScripts>
+      <jsScript>
+        <jsScript_type>0</jsScript_type>
+        <jsScript_name>Script 1</jsScript_name>
+        <jsScript_script>responseXML = responseXML.replace(/^&lt;\?xml\s+version\s*=\s*(["'])[^\1]+\1[^?]*\?>/, "");
+var response = new XML(responseXML);
+var soap = response.namespace();
+var ws = response.*.*.namespace();
+default xml namespace = ws
+
+var responseBody = String(response.soap::Body.consultaCEPResponse);
+
+var n = responseBody.search('&lt;cidade>') + 8;
+var final = responseBody.search('&lt;/cidade>') - 1;
+var cidade = '';
+var estado = '';
+
+while (n &lt;= final) {
+	
+	cidade = cidade + responseBody.substr(n,1);
+	n = n +1;
+};
+
+n = responseBody.search('&lt;uf>') + 4;
+var final = responseBody.search('&lt;/uf>') - 1;
+
+while (n &lt;= final) {
+	estado = estado + responseBody.substr(n,1);
+		n = n +1;
+};
+
+if (!cidade) {
+	cidade = 'Endereço não encontrado na base dos Correios.'
+};</jsScript_script>
+      </jsScript>
+    </jsScripts>
     <fields>
-      <field>
-        <aggregate>valor_total_compras</aggregate>
-        <subject>valor</subject>
-        <type>SUM</type>
-        <valuefield/>
-      </field>
-      <field>
-        <aggregate>nome</aggregate>
-        <subject>nome</subject>
-        <type>CONCAT_STRING</type>
-        <valuefield/>
-      </field>
-      <field>
-        <aggregate>cpf</aggregate>
-        <subject>cpf</subject>
-        <type>CONCAT_STRING</type>
-        <valuefield/>
-      </field>
-      <field>
-        <aggregate>valor_total_frete</aggregate>
-        <subject>valor_frete</subject>
-        <type>SUM</type>
-        <valuefield/>
-      </field>
-      <field>
-        <aggregate>cidade</aggregate>
-        <subject>cidade</subject>
-        <type>CONCAT_STRING</type>
-        <valuefield/>
-      </field>
-      <field>
-        <aggregate>estado</aggregate>
-        <subject>estado</subject>
-        <type>CONCAT_STRING</type>
-        <valuefield/>
-      </field>
-    </fields>
-    <cluster_schema/>
-    <remotesteps>
-      <input>
-      </input>
-      <output>
-      </output>
-    </remotesteps>
-    <GUI>
-      <xloc>768</xloc>
-      <yloc>240</yloc>
-      <draw>Y</draw>
-    </GUI>
-  </step>
-  <step>
-    <name>HTTP Post</name>
-    <type>HTTPPOST</type>
-    <description/>
-    <distribute>Y</distribute>
-    <custom_distribution/>
-    <copies>1</copies>
-    <partitioning>
-      <method>none</method>
-      <schema_name/>
-    </partitioning>
-    <postafile>N</postafile>
-    <encoding/>
-    <url>http://ws.correios.com.br/calculador/CalcPrecoPrazo.asmx?WSDL</url>
-    <urlInField>N</urlInField>
-    <urlField/>
-    <requestEntity>requestXml</requestEntity>
-    <httpLogin/>
-    <httpPassword>Encrypted </httpPassword>
-    <proxyHost/>
-    <proxyPort/>
-    <socketTimeout>10000</socketTimeout>
-    <connectionTimeout>10000</connectionTimeout>
-    <closeIdleConnectionsTime>-1</closeIdleConnectionsTime>
-    <lookup>
-      </lookup>
-    <result>
-      <name>responseXML</name>
-      <code>StatusCode</code>
-      <response_time/>
-      <response_header/>
-    </result>
-    <cluster_schema/>
-    <remotesteps>
-      <input>
-      </input>
-      <output>
-      </output>
-    </remotesteps>
-    <GUI>
-      <xloc>768</xloc>
-      <yloc>128</yloc>
-      <draw>Y</draw>
-    </GUI>
-  </step>
-  <step>
-    <name>JSON Input</name>
-    <type>JsonInput</type>
-    <description/>
-    <distribute>Y</distribute>
-    <custom_distribution/>
-    <copies>1</copies>
-    <partitioning>
-      <method>none</method>
-      <schema_name/>
-    </partitioning>
-    <include>N</include>
-    <include_field/>
-    <rownum>N</rownum>
-    <addresultfile>N</addresultfile>
-    <readurl>N</readurl>
-    <removeSourceField>N</removeSourceField>
-    <IsIgnoreEmptyFile>N</IsIgnoreEmptyFile>
-    <doNotFailIfNoFile>Y</doNotFailIfNoFile>
-    <ignoreMissingPath>Y</ignoreMissingPath>
-    <defaultPathLeafToNull>Y</defaultPathLeafToNull>
-    <rownum_field/>
-    <file>
-      <name/>
-      <filemask/>
-      <exclude_filemask/>
-      <file_required>N</file_required>
-      <include_subfolders>N</include_subfolders>
-    </file>
-    <fields>
-      <field>
-        <name>endereco</name>
-        <path>$..logradouro</path>
-        <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <length>-1</length>
-        <precision>-1</precision>
-        <trim_type>none</trim_type>
-        <repeat>N</repeat>
-      </field>
       <field>
         <name>cidade</name>
-        <path>$..localidade</path>
+        <rename>cidade</rename>
         <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
         <length>-1</length>
         <precision>-1</precision>
-        <trim_type>none</trim_type>
-        <repeat>N</repeat>
+        <replace>N</replace>
       </field>
       <field>
         <name>estado</name>
-        <path>$..uf</path>
+        <rename>estado</rename>
         <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
         <length>-1</length>
         <precision>-1</precision>
-        <trim_type>none</trim_type>
-        <repeat>N</repeat>
+        <replace>N</replace>
       </field>
     </fields>
-    <limit>0</limit>
-    <IsInFields>Y</IsInFields>
-    <IsAFile>N</IsAFile>
-    <valueField>result</valueField>
-    <shortFileFieldName/>
-    <pathFieldName/>
-    <hiddenFieldName/>
-    <lastModificationTimeFieldName/>
-    <uriNameFieldName/>
-    <rootUriNameFieldName/>
-    <extensionFieldName/>
-    <sizeFieldName/>
     <cluster_schema/>
     <remotesteps>
       <input>
@@ -960,7 +792,57 @@
     </GUI>
   </step>
   <step>
-    <name>Microsoft Excel Output</name>
+    <name>Extrair Valor Frete</name>
+    <type>ScriptValueMod</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <compatible>N</compatible>
+    <optimizationLevel>9</optimizationLevel>
+    <jsScripts>
+      <jsScript>
+        <jsScript_type>0</jsScript_type>
+        <jsScript_name>Script 1</jsScript_name>
+        <jsScript_script>responseXMLFrete = responseXMLFrete.replace(/^&lt;\?xml\s+version\s*=\s*(["'])[^\1]+\1[^?]*\?>/, "");
+var response = new XML(responseXMLFrete);
+var soap = response.namespace();
+var ws = response.*.*.namespace();
+default xml namespace = ws
+var responseBody = response.soap::Body.CalcPrecoResponse;
+var valor_frete = responseBody.CalcPrecoResult.Servicos.cServico.Valor;
+</jsScript_script>
+      </jsScript>
+    </jsScripts>
+    <fields>
+      <field>
+        <name>valor_frete</name>
+        <rename>valor_frete</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>
+    </fields>
+    <cluster_schema/>
+    <remotesteps>
+      <input>
+      </input>
+      <output>
+      </output>
+    </remotesteps>
+    <GUI>
+      <xloc>880</xloc>
+      <yloc>128</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+  <step>
+    <name>Gerar Planilha</name>
     <type>ExcelOutput</type>
     <description/>
     <distribute>Y</distribute>
@@ -1006,28 +888,28 @@
         <format/>
       </field>
       <field>
-        <name>valor_total_compras</name>
-        <type>Number</type>
-        <format/>
-      </field>
-      <field>
         <name>nome</name>
-        <type>String</type>
-        <format/>
-      </field>
-      <field>
-        <name>valor_total_frete</name>
-        <type>Number</type>
+        <type>None</type>
         <format/>
       </field>
       <field>
         <name>cidade</name>
-        <type>String</type>
+        <type>None</type>
         <format/>
       </field>
       <field>
         <name>estado</name>
-        <type>String</type>
+        <type>None</type>
+        <format/>
+      </field>
+      <field>
+        <name>valor_total_compras</name>
+        <type>None</type>
+        <format/>
+      </field>
+      <field>
+        <name>valor_total_frete</name>
+        <type>None</type>
         <format/>
       </field>
     </fields>
@@ -1056,14 +938,14 @@
       </output>
     </remotesteps>
     <GUI>
-      <xloc>880</xloc>
-      <yloc>240</yloc>
+      <xloc>928</xloc>
+      <yloc>336</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
   <step>
-    <name>Modified Java Script Value</name>
-    <type>ScriptValueMod</type>
+    <name>Group by 2</name>
+    <type>GroupBy</type>
     <description/>
     <distribute>Y</distribute>
     <custom_distribution/>
@@ -1072,46 +954,55 @@
       <method>none</method>
       <schema_name/>
     </partitioning>
-    <compatible>N</compatible>
-    <optimizationLevel>9</optimizationLevel>
-    <jsScripts>
-      <jsScript>
-        <jsScript_type>0</jsScript_type>
-        <jsScript_name>Script 1</jsScript_name>
-        <jsScript_script>responseXML = responseXML.replace(/^&lt;\?xml\s+version\s*=\s*(["'])[^\1]+\1[^?]*\?>/, "");
-var response = new XML(responseXML);
-var soap = response.namespace();
-var ws = response.*.*.namespace();
-default xml namespace = ws
-var responseBody = response.soap::Body.CalcPrecoResponse;
-var valor_frete = responseBody.CalcPrecoResult.Servicos.cServico.Valor;
-</jsScript_script>
-      </jsScript>
-    </jsScripts>
+    <all_rows>N</all_rows>
+    <ignore_aggregate>N</ignore_aggregate>
+    <field_ignore/>
+    <directory>%%java.io.tmpdir%%</directory>
+    <prefix>grp</prefix>
+    <add_linenr>N</add_linenr>
+    <linenr_fieldname/>
+    <give_back_row>N</give_back_row>
+    <group>
+      <field>
+        <name>cpf</name>
+      </field>
+    </group>
     <fields>
       <field>
-        <name>response</name>
-        <rename>response</rename>
-        <type>String</type>
-        <length>-1</length>
-        <precision>-1</precision>
-        <replace>N</replace>
+        <aggregate>valor_total_compras</aggregate>
+        <subject>valor</subject>
+        <type>SUM</type>
+        <valuefield/>
       </field>
       <field>
-        <name>responseBody</name>
-        <rename>responseBody</rename>
-        <type>String</type>
-        <length>-1</length>
-        <precision>-1</precision>
-        <replace>N</replace>
+        <aggregate>valor_total_frete</aggregate>
+        <subject>valor_frete</subject>
+        <type>SUM</type>
+        <valuefield/>
       </field>
       <field>
-        <name>valor_frete</name>
-        <rename>valor_frete</rename>
-        <type>String</type>
-        <length>-1</length>
-        <precision>-1</precision>
-        <replace>N</replace>
+        <aggregate>cidade</aggregate>
+        <subject>cidade</subject>
+        <type>FIRST_INCL_NULL</type>
+        <valuefield/>
+      </field>
+      <field>
+        <aggregate>estado</aggregate>
+        <subject>estado</subject>
+        <type>FIRST_INCL_NULL</type>
+        <valuefield/>
+      </field>
+      <field>
+        <aggregate>nome</aggregate>
+        <subject>nome</subject>
+        <type>FIRST_INCL_NULL</type>
+        <valuefield/>
+      </field>
+      <field>
+        <aggregate>cpf</aggregate>
+        <subject>cpf</subject>
+        <type>FIRST_INCL_NULL</type>
+        <valuefield/>
       </field>
     </fields>
     <cluster_schema/>
@@ -1122,7 +1013,97 @@ var valor_frete = responseBody.CalcPrecoResult.Servicos.cServico.Valor;
       </output>
     </remotesteps>
     <GUI>
-      <xloc>880</xloc>
+      <xloc>768</xloc>
+      <yloc>240</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+  <step>
+    <name>HTTP Post</name>
+    <type>HTTPPOST</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <postafile>N</postafile>
+    <encoding/>
+    <url>http://ws.correios.com.br/calculador/CalcPrecoPrazo.asmx?WSDL</url>
+    <urlInField>N</urlInField>
+    <urlField/>
+    <requestEntity>requestXmlFrete</requestEntity>
+    <httpLogin/>
+    <httpPassword>Encrypted </httpPassword>
+    <proxyHost/>
+    <proxyPort/>
+    <socketTimeout>1000000</socketTimeout>
+    <connectionTimeout>1000000</connectionTimeout>
+    <closeIdleConnectionsTime>-1</closeIdleConnectionsTime>
+    <lookup>
+      </lookup>
+    <result>
+      <name>responseXMLFrete</name>
+      <code>StatusCode</code>
+      <response_time/>
+      <response_header/>
+    </result>
+    <cluster_schema/>
+    <remotesteps>
+      <input>
+      </input>
+      <output>
+      </output>
+    </remotesteps>
+    <GUI>
+      <xloc>768</xloc>
+      <yloc>128</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+  <step>
+    <name>HTTP Post 2</name>
+    <type>HTTPPOST</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <postafile>N</postafile>
+    <encoding/>
+    <url>https://apps.correios.com.br/SigepMasterJPA/AtendeClienteService/AtendeCliente</url>
+    <urlInField>N</urlInField>
+    <urlField/>
+    <requestEntity>requestXmlEnd</requestEntity>
+    <httpLogin/>
+    <httpPassword>Encrypted </httpPassword>
+    <proxyHost/>
+    <proxyPort/>
+    <socketTimeout>10000</socketTimeout>
+    <connectionTimeout>10000</connectionTimeout>
+    <closeIdleConnectionsTime>-1</closeIdleConnectionsTime>
+    <lookup>
+      </lookup>
+    <result>
+      <name>responseXML</name>
+      <code>StatusCode</code>
+      <response_time/>
+      <response_header/>
+    </result>
+    <cluster_schema/>
+    <remotesteps>
+      <input>
+      </input>
+      <output>
+      </output>
+    </remotesteps>
+    <GUI>
+      <xloc>528</xloc>
       <yloc>128</yloc>
       <draw>Y</draw>
     </GUI>
@@ -1179,14 +1160,14 @@ request = &lt;soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/en
          &lt;tem:nVlDiametro>1&lt;/tem:nVlDiametro>
          &lt;!--Optional:-->
          &lt;tem:sCdMaoPropria>S&lt;/tem:sCdMaoPropria>
-         &lt;tem:nVlValorDeclarado>0&lt;/tem:nVlValorDeclarado>
+         &lt;tem:nVlValorDeclarado>{valor}&lt;/tem:nVlValorDeclarado>
          &lt;!--Optional:-->
          &lt;tem:sCdAvisoRecebimento>N&lt;/tem:sCdAvisoRecebimento>
       &lt;/tem:CalcPreco>
    &lt;/soapenv:Body>
 &lt;/soapenv:Envelope>;
 
-var requestXml=request.toXMLString();
+var requestXmlFrete=request.toXMLString();
 </jsScript_script>
       </jsScript>
     </jsScripts>
@@ -1224,8 +1205,8 @@ var requestXml=request.toXMLString();
         <replace>N</replace>
       </field>
       <field>
-        <name>requestXml</name>
-        <rename>requestXml</rename>
+        <name>requestXmlFrete</name>
+        <rename>requestXmlFrete</rename>
         <type>String</type>
         <length>-1</length>
         <precision>-1</precision>
@@ -1291,6 +1272,47 @@ var requestXml=request.toXMLString();
     <GUI>
       <xloc>416</xloc>
       <yloc>240</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+  <step>
+    <name>Ordenar Maior Faturamento</name>
+    <type>SortRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <directory>%%java.io.tmpdir%%</directory>
+    <prefix>out</prefix>
+    <sort_size>1000000</sort_size>
+    <free_memory/>
+    <compress>N</compress>
+    <compress_variable/>
+    <unique_rows>N</unique_rows>
+    <fields>
+      <field>
+        <name>valor_total_compras</name>
+        <ascending>N</ascending>
+        <case_sensitive>N</case_sensitive>
+        <collator_enabled>N</collator_enabled>
+        <collator_strength>0</collator_strength>
+        <presorted>N</presorted>
+      </field>
+    </fields>
+    <cluster_schema/>
+    <remotesteps>
+      <input>
+      </input>
+      <output>
+      </output>
+    </remotesteps>
+    <GUI>
+      <xloc>768</xloc>
+      <yloc>336</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
@@ -1448,10 +1470,10 @@ var requestXml=request.toXMLString();
         <name>request</name>
       </remove>
       <remove>
-        <name>requestXml</name>
+        <name>requestXmlFrete</name>
       </remove>
       <remove>
-        <name>viacep</name>
+        <name>requestXmlEnd</name>
       </remove>
       <remove>
         <name>responseXML</name>
@@ -1460,10 +1482,10 @@ var requestXml=request.toXMLString();
         <name>StatusCode</name>
       </remove>
       <remove>
-        <name>response</name>
+        <name>responseXMLFrete</name>
       </remove>
       <remove>
-        <name>responseBody</name>
+        <name>StatusCode_1</name>
       </remove>
       <meta>
         <name>valor</name>
@@ -1497,7 +1519,7 @@ var requestXml=request.toXMLString();
     </GUI>
   </step>
   <step>
-    <name>URL_VIACEP</name>
+    <name>Preparar XML Endereço</name>
     <type>ScriptValueMod</type>
     <description/>
     <distribute>Y</distribute>
@@ -1513,15 +1535,26 @@ var requestXml=request.toXMLString();
       <jsScript>
         <jsScript_type>0</jsScript_type>
         <jsScript_name>Script 1</jsScript_name>
-        <jsScript_script>var viacep = 'http://correiosapi.apphb.com/cep/'+cep;
-//'http://viacep.com.br/ws/'+cep+'/json';
-//'http://correiosapi.apphb.com/cep/'+cep;</jsScript_script>
+        <jsScript_script>var request = new XML()
+
+request = &lt;soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/' xmlns:cli='http://cliente.bean.master.sigep.bsb.correios.com.br/'>
+   &lt;soapenv:Header/>
+   &lt;soapenv:Body>
+      &lt;cli:consultaCEP>
+         &lt;!--Optional:-->
+         &lt;cep>{cep}&lt;/cep>
+      &lt;/cli:consultaCEP>
+   &lt;/soapenv:Body>
+&lt;/soapenv:Envelope>;
+
+var requestXmlEnd=request.toXMLString();
+</jsScript_script>
       </jsScript>
     </jsScripts>
     <fields>
       <field>
-        <name>viacep</name>
-        <rename>viacep</rename>
+        <name>requestXmlEnd</name>
+        <rename>requestXmlEnd</rename>
         <type>String</type>
         <length>-1</length>
         <precision>-1</precision>
@@ -1537,6 +1570,178 @@ var requestXml=request.toXMLString();
     </remotesteps>
     <GUI>
       <xloc>416</xloc>
+      <yloc>128</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+  <step>
+    <name>Microsoft Excel Output</name>
+    <type>ExcelOutput</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <header>Y</header>
+    <footer>N</footer>
+    <encoding/>
+    <append>N</append>
+    <add_to_result_filenames>Y</add_to_result_filenames>
+    <file>
+      <name>C:\Telmo\Desafio\file.xls.xls</name>
+      <extention>xls</extention>
+      <do_not_open_newfile_init>N</do_not_open_newfile_init>
+      <create_parent_folder>N</create_parent_folder>
+      <split>N</split>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <SpecifyFormat>N</SpecifyFormat>
+      <date_time_format/>
+      <sheetname>Sheet1</sheetname>
+      <autosizecolums>N</autosizecolums>
+      <nullisblank>N</nullisblank>
+      <protect_sheet>N</protect_sheet>
+      <password>Encrypted </password>
+      <splitevery>0</splitevery>
+      <usetempfiles>N</usetempfiles>
+      <tempdirectory/>
+    </file>
+    <template>
+      <enabled>N</enabled>
+      <append>N</append>
+      <filename>template.xls</filename>
+    </template>
+    <fields>
+      <field>
+        <name>data</name>
+        <type>String</type>
+        <format/>
+      </field>
+      <field>
+        <name>valor</name>
+        <type>Number</type>
+        <format/>
+      </field>
+      <field>
+        <name>peso</name>
+        <type>Integer</type>
+        <format/>
+      </field>
+      <field>
+        <name>nome</name>
+        <type>String</type>
+        <format/>
+      </field>
+      <field>
+        <name>cpf</name>
+        <type>String</type>
+        <format/>
+      </field>
+      <field>
+        <name>cep</name>
+        <type>Integer</type>
+        <format/>
+      </field>
+      <field>
+        <name>numero_casa</name>
+        <type>Integer</type>
+        <format/>
+      </field>
+      <field>
+        <name>data_array</name>
+        <type>String</type>
+        <format/>
+      </field>
+      <field>
+        <name>data_xml</name>
+        <type>Date</type>
+        <format/>
+      </field>
+      <field>
+        <name>data_atual</name>
+        <type>Date</type>
+        <format/>
+      </field>
+      <field>
+        <name>request</name>
+        <type>String</type>
+        <format/>
+      </field>
+      <field>
+        <name>requestXmlFrete</name>
+        <type>String</type>
+        <format/>
+      </field>
+      <field>
+        <name>requestXmlEnd</name>
+        <type>String</type>
+        <format/>
+      </field>
+      <field>
+        <name>responseXML</name>
+        <type>String</type>
+        <format/>
+      </field>
+      <field>
+        <name>StatusCode</name>
+        <type>Integer</type>
+        <format/>
+      </field>
+      <field>
+        <name>cidade</name>
+        <type>String</type>
+        <format/>
+      </field>
+      <field>
+        <name>estado</name>
+        <type>String</type>
+        <format/>
+      </field>
+      <field>
+        <name>responseXMLFrete</name>
+        <type>String</type>
+        <format/>
+      </field>
+      <field>
+        <name>StatusCode_1</name>
+        <type>Integer</type>
+        <format/>
+      </field>
+      <field>
+        <name>valor_frete</name>
+        <type>String</type>
+        <format/>
+      </field>
+    </fields>
+    <custom>
+      <header_font_name>arial</header_font_name>
+      <header_font_size>10</header_font_size>
+      <header_font_bold>N</header_font_bold>
+      <header_font_italic>N</header_font_italic>
+      <header_font_underline>no</header_font_underline>
+      <header_font_orientation>horizontal</header_font_orientation>
+      <header_font_color>black</header_font_color>
+      <header_background_color>none</header_background_color>
+      <header_row_height>255</header_row_height>
+      <header_alignment>left</header_alignment>
+      <header_image/>
+      <row_font_name>arial</row_font_name>
+      <row_font_size>10</row_font_size>
+      <row_font_color>black</row_font_color>
+      <row_background_color>none</row_background_color>
+    </custom>
+    <cluster_schema/>
+    <remotesteps>
+      <input>
+      </input>
+      <output>
+      </output>
+    </remotesteps>
+    <GUI>
+      <xloc>992</xloc>
       <yloc>128</yloc>
       <draw>Y</draw>
     </GUI>
